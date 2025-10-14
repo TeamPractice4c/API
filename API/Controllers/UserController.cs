@@ -44,7 +44,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("DeleteUser_{id}")]
-        public ActionResult<ExportUser> DeleteUser(int id)
+        public ActionResult DeleteUser(int id)
         {
             User? user = Context.Users.FirstOrDefault(x => x.UId == id);
 
@@ -53,7 +53,7 @@ namespace API.Controllers
                 return NotFound("Пользователь не найден");
             }
 
-            return Ok(user.ToExport());
+            return Ok();
         }
 
 

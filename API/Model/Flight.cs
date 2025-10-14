@@ -1,4 +1,5 @@
-﻿using System;
+﻿using API.ExportClasses;
+using System;
 using System.Collections.Generic;
 
 namespace API.Model;
@@ -26,4 +27,18 @@ public partial class Flight
     public virtual Airport FDepartureAirportNavigation { get; set; } = null!;
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+
+    public ExportFlight ToExport()
+    {
+        return new()
+        {
+            FId = FId,
+            FAirline = FAirlineNavigation.AlName,
+            FDepartureAirport = FDepartureAirportNavigation.ApName,
+            FArrivalAirport = FArrivalAirportNavigation.ApName,
+            FDepartureTime = FDepartureTime,
+            FArrivalTime = FArrivalTime,
+            FSeatsCount = FSeatsCount,
+        };
+    }
 }

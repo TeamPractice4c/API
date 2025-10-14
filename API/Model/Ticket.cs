@@ -1,6 +1,6 @@
 ﻿using API.Enums;
-using System;
-using System.Collections.Generic;
+using API.ExportClasses;
+using API.StaticClasses;
 
 namespace API.Model;
 
@@ -23,4 +23,18 @@ public partial class Ticket
     public virtual Flight TFlightNavigation { get; set; } = null!;
 
     public virtual User TUserNavigation { get; set; } = null!;
+
+    public ExportTicket ToExport()
+    {
+        return new()
+        {
+            TId = TId,
+            TFlight = TFlight,
+            TUser = $"{TUserNavigation.USurname} {TUserNavigation.UName} {TUserNavigation.UPatronymic}",
+            TBoughtDate = TBoughtDate,
+            TClass = Convertation.ConvertEnumToString(TClass),
+            TTotalPrice = TTotalPrice,
+            TStatus = Convertation.ConvertEnumToString(TStatus),
+        };
+    }
 }
