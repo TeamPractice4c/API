@@ -30,7 +30,7 @@ namespace API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("User_{id}")]
+        [HttpGet("GetUser/{id}")]
         public ActionResult<ExportUser> GetUser(int id)
         {
             User? user = Context.Users.FirstOrDefault(x => x.UId == id);
@@ -43,7 +43,7 @@ namespace API.Controllers
             return Ok(user.ToExport());
         }
 
-        [HttpDelete("DeleteUser_{id}")]
+        [HttpDelete("DeleteUser/{id}")]
         public ActionResult DeleteUser(int id)
         {
             User? user = Context.Users.FirstOrDefault(x => x.UId == id);
