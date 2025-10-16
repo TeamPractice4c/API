@@ -53,6 +53,10 @@ namespace API.Controllers
                 return NotFound("Пользователь не найден");
             }
 
+            Context.Users.Remove(user);
+
+            Context.SaveChanges();
+
             return Ok();
         }
 
