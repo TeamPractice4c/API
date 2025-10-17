@@ -1,7 +1,7 @@
 ﻿using API.Enums;
 using API.ExportClasses;
+using API.InternalClasses;
 using API.Model;
-using API.StaticClasses;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -94,7 +94,7 @@ namespace API.Controllers
                 UPatronymic = user.UPatronymic,
                 UEmail = user.UEmail,
                 UPassword = enc_password,
-                URole = (Role)Convertation.ConvertStringToEnum<Role>(user.URole)!,
+                URole = (Role)Convertation.ConvertStringToEnum<Role>("Клиент")!,
                 UPhone = user.UPhone,
                 UBirthdate = user.UBirthdate,
                 UPassportNumber = user.UPassportNumber,

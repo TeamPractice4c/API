@@ -1,6 +1,6 @@
 ﻿using API.Enums;
 using API.ExportClasses;
-using API.StaticClasses;
+using API.InternalClasses;
 
 namespace API.Model;
 

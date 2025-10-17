@@ -1,5 +1,6 @@
 ﻿using API.Enums;
 using API.ExportClasses;
+using API.InternalClasses;
 using System;
 using System.Collections.Generic;
 
@@ -45,7 +46,7 @@ public partial class User
             UPassportNumber = UPassportNumber,
             UBirthdate = UBirthdate,
             UPatronymic = UPatronymic,
-            URole = StaticClasses.Convertation.ConvertEnumToString(URole),
+            URole = Convertation.ConvertEnumToString(URole),
         };
     }
 }

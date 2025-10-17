@@ -1,8 +1,8 @@
 ﻿using API.Enums;
 
-namespace API.StaticClasses
+namespace API.InternalClasses
 {
-    public static class Convertation
+    internal static class Convertation
     {
         public static string ConvertEnumToString(Role role)
         {
