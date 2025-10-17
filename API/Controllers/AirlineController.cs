@@ -67,7 +67,7 @@ namespace API.Controllers
         [HttpPost("EditAirline")]
         public ActionResult<ExportAirline> EditAirline([FromBody] ExportAirline airline)
         {
-            Airline? gotten_airline = Context.Airlines.FirstOrDefault(x => x.AlName == airline.AlName);
+            Airline? gotten_airline = Context.Airlines.FirstOrDefault(x => x.AlId == airline.AlId);
 
             if (gotten_airline is null)
             {
@@ -91,7 +91,7 @@ namespace API.Controllers
 
             if (airline is null)
             {
-                return NotFound("Пользователь не найден");
+                return NotFound("Указанная авиакомпания не найдена");
             }
 
             Context.Airlines.Remove(airline);

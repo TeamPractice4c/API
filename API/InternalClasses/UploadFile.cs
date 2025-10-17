@@ -1,6 +1,6 @@
 ﻿namespace API.InternalClasses
 {
-    internal class UploadFile
+    public class UploadFile
     {
         public IFormFile File { get; set; }
     }
