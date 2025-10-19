@@ -32,7 +32,7 @@ public partial class User
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 
-    public ExportUser ToExport()
+    internal ExportUser ToExport()
     {
         return new()
         {
@@ -48,5 +48,17 @@ public partial class User
             UPatronymic = UPatronymic,
             URole = Convertation.ConvertEnumToString(URole),
         };
+    }
+
+    public int GetUserId(string snp)
+    {
+        string user_snp = $"{USurname} {UName} {UPatronymic}";
+
+        if (user_snp == snp)
+        {
+            return UId;
+        }
+
+        return -1;
     }
 }

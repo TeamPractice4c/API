@@ -110,7 +110,7 @@ public partial class PostgresContext(DbContextOptions<PostgresContext> options) 
             entity.Property(e => e.TBoughtDate)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("t_bought_date");
-            entity.Property(e => e.TStatus).HasColumnType("t_status");
+            entity.Property(e => e.TStatus).HasColumnName("t_status");
             entity.Property(e => e.TFlight).HasColumnName("t_flight");
             entity.Property(e => e.TTotalPrice).HasColumnName("t_total_price");
             entity.Property(e => e.TClass).HasColumnName("t_class");
