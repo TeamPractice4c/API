@@ -47,9 +47,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
 
-
-//app.MapStaticAssets();
 app.UseStaticFiles();
 
 app.UseCors(MyAllowSpecificOrigins);

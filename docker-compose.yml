@@ -24,13 +24,18 @@ services:
    - db
   ports:
    - "3000:8080"
+   - "3030:8081"
   environment:
     - DBHOST=db
     - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=https://+:8081;http://+:8080
+    - ASPNETCORE_Kestrel__Certificates__Default__Password=1245780r
+    - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
   networks:
       - my-network
   volumes:
       - imagesvolume:/app/wwwroot/images
+      - ~/.aspnet/https:/https:ro
 
 networks:
   my-network:
