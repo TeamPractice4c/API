@@ -28,8 +28,14 @@ namespace API.InternalClasses
             smtp.Send(mail_message);
         }
 
-        public static void SendTicket(Ticket ticket, User user, Flight flight, Airline airline, Airport arrivalairport, Airport departureairport)
+        public static void SendTicket(PostgresContext context, int ticketid)
         {
+            Ticket ticket = context.Tickets.First(t => t.TId == ticketid);
+            User user = context.Users.First(t => t.UId == ticket.TUser);
+            Flight flight = context.Flights.First(t => t.FId == ticket.TFlight);
+            Airline airline = context.Airlines.First(t => t.AlId == flight.FAirline);
+            Airport arrivalairport = context.Airports.First(t => t.ApId == flight.FArrivalAirport);
+            Airport departureairport = context.Airports.First(t => t.ApId == flight.FDepartureAirport);
             MailAddress from = new(_email, "SkyWhySales");
             MailAddress to = new(user.UEmail);
 
