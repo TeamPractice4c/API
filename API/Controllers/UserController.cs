@@ -101,6 +101,8 @@ namespace API.Controllers
                 UPassportSerial = user.UPassportSerial,
             };
 
+            SendEmail.SendLoginInformation(user.UEmail, user.UPassword);
+
             Context.Users.Add(new_user);
 
             Context.SaveChanges();
