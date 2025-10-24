@@ -72,11 +72,11 @@ namespace API.Controllers
                 TStatus = (TicketStatus)Convertation.ConvertStringToEnum<TicketStatus>("Куплен")!
             };
 
-            SendEmail.SendTicket(Context, id);
-
             Context.Tickets.Add(new_ticket);
 
             Context.SaveChanges();
+
+            SendEmail.SendTicket(Context, id);
 
             return Ok(new_ticket.ToExport());
         }
