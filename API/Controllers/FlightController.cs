@@ -76,9 +76,9 @@ namespace API.Controllers
             Flight new_flight = new()
             {
                 FId = id,
-                FAirline = airline,
-                FDepartureAirport = departure_airport,
-                FArrivalAirport = arrival_airport,
+                FAirline = airline.AlId,
+                FDepartureAirport = departure_airport.ApId,
+                FArrivalAirport = arrival_airport.ApId,
                 FDepartureTime = flight.FDepartureTime,
                 FArrivalTime = flight.FArrivalTime,
                 FSeatsCount = flight.FSeatsCount,
