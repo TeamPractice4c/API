@@ -80,10 +80,10 @@ namespace API.Controllers
             }
 
             gotten_airport.ApName = airport.ApName;
-            gotten_airport.ApCountry = gotten_airport.ApCountry;
-            gotten_airport.ApCity = gotten_airport.ApCity;
-            gotten_airport.ApStreet = gotten_airport.ApStreet;
-            gotten_airport.ApBuilding = gotten_airport.ApBuilding;
+            gotten_airport.ApCountry = airport.ApCountry;
+            gotten_airport.ApCity = airport.ApCity;
+            gotten_airport.ApStreet = airport.ApStreet;
+            gotten_airport.ApBuilding = airport.ApBuilding;
 
             Context.Airports.Update(gotten_airport);
 

@@ -75,7 +75,7 @@ namespace API.Controllers
             }
 
             gotten_airline.AlName = airline.AlName;
-            gotten_airline.AlEmail = gotten_airline.AlEmail;
+            gotten_airline.AlEmail = airline.AlEmail;
 
             Context.Airlines.Update(gotten_airline);
 
