@@ -134,7 +134,7 @@ namespace API.Controllers
         [HttpPost("EditUser")]
         public ActionResult<ExportUser> EditUserInfo([FromBody] ExportUser user)
         {
-            User? gotten_user = Context.Users.FirstOrDefault(x => x.UEmail == user.UEmail);
+            User? gotten_user = Context.Users.FirstOrDefault(x => x.UId == user.UId);
 
             if (gotten_user is null)
             {
