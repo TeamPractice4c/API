@@ -68,6 +68,7 @@ namespace API.Controllers
                 FDepartureTime = flight.FDepartureTime,
                 FArrivalTime = flight.FArrivalTime,
                 FSeatsCount = flight.FSeatsCount,
+                FPrice = flight.FPrice,
             });
 
             Context.SaveChanges();
@@ -95,6 +96,7 @@ namespace API.Controllers
             gotten_flight.FDepartureTime = flight.FDepartureTime;
             gotten_flight.FArrivalTime = flight.FArrivalTime;
             gotten_flight.FSeatsCount = flight.FSeatsCount;
+            gotten_flight.FPrice = flight.FPrice;
 
             Context.Flights.Update(gotten_flight);
             Context.SaveChanges();
