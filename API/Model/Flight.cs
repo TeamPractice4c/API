@@ -20,6 +20,8 @@ public partial class Flight
 
     public int FSeatsCount { get; set; }
 
+    public int FPrice { get; set; }
+    
     public virtual Airline FAirlineNavigation { get; set; } = null!;
 
     public virtual Airport FArrivalAirportNavigation { get; set; } = null!;
@@ -39,6 +41,7 @@ public partial class Flight
             FDepartureTime = FDepartureTime,
             FArrivalTime = FArrivalTime,
             FSeatsCount = FSeatsCount,
+            FPrice = FPrice,
         };
     }
 }

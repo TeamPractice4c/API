@@ -15,5 +15,7 @@
         public DateTime FArrivalTime { get; set; }
 
         public int FSeatsCount { get; set; }
+
+        public int FPrice { get; set;  }
     }
 }

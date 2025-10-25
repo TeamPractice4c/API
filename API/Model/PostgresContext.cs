@@ -84,6 +84,7 @@ public partial class PostgresContext(DbContextOptions<PostgresContext> options) 
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("f_departure_time");
             entity.Property(e => e.FSeatsCount).HasColumnName("f_seats_count");
+            entity.Property(e => e.FPrice).HasColumnName("f_price");
 
             entity.HasOne(d => d.FAirlineNavigation).WithMany(p => p.Flights)
                 .HasForeignKey(d => d.FAirline)
