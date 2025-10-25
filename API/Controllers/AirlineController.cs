@@ -52,16 +52,18 @@ namespace API.Controllers
 
             int id = Context.Airlines.Any() ? Context.Airlines.Max(x => x.AlId) + 1 : 1;
 
-            Context.Airlines.Add(new()
+            Airline new_airline = new()
             {
                 AlId = id,
                 AlName = airline.AlName,
                 AlEmail = airline.AlEmail,
-            });
+            };
+
+            Context.Airlines.Add(new_airline);
 
             Context.SaveChanges();
 
-            return Ok(airline);
+            return Ok(new_airline.ToExport());
         }
 
         [HttpPost("EditAirline")]

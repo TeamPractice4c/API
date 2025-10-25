@@ -43,12 +43,27 @@ namespace API.Controllers
         [HttpPost("AddFlight")]
         public ActionResult<ExportFlight> AddFlight([FromBody] ExportFlight flight)
         {
-            int airline = Context.Airlines.First(x => x.AlName == flight.FAirline).AlId;
-            int departure_airport = Context.Airports.First(x => x.ApName == flight.FDepartureAirport).ApId;
-            int arrival_airport = Context.Airports.First(x => x.ApName == flight.FArrivalAirport).ApId;
+            Airline? airline = Context.Airlines.FirstOrDefault(x => x.AlName == flight.FAirline);
+            Airport? departure_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FDepartureAirport);
+            Airport? arrival_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FArrivalAirport);
 
-            Flight? gotten_flight = Context.Flights.FirstOrDefault(x => x.FAirline == airline &&
-            x.FArrivalAirport == arrival_airport && x.FDepartureAirport == departure_airport && 
+            if (airline is null)
+            {
+                return BadRequest("Указанная авиакомпания не найдена");
+            }
+
+            if (departure_airport is null)
+            {
+                return BadRequest("Указанный аэропорт страны отправления не найден");
+            }
+
+            if (arrival_airport is null)
+            {
+                return BadRequest("Указанный аэропорт страны назначения не найден");
+            }
+
+            Flight? gotten_flight = Context.Flights.FirstOrDefault(x => x.FAirline == airline.AlId &&
+            x.FArrivalAirport == arrival_airport.ApId && x.FDepartureAirport == departure_airport.ApId && 
             x.FDepartureTime == flight.FDepartureTime && x.FArrivalTime == flight.FArrivalTime);
 
             if (gotten_flight is not null)
@@ -57,9 +72,8 @@ namespace API.Controllers
             }
 
            int id = Context.Flights.Any() ? Context.Flights.Max(x => x.FId) + 1 : 1;
-            
 
-            Context.Flights.Add(new()
+            Flight new_flight = new()
             {
                 FId = id,
                 FAirline = airline,
@@ -69,11 +83,13 @@ namespace API.Controllers
                 FArrivalTime = flight.FArrivalTime,
                 FSeatsCount = flight.FSeatsCount,
                 FPrice = flight.FPrice,
-            });
+            };
+
+            Context.Flights.Add(new_flight);
 
             Context.SaveChanges();
 
-            return Ok(flight);
+            return Ok(new_flight.ToExport());
         }
 
         [HttpPost("EditFlight")]

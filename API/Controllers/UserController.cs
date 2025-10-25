@@ -64,14 +64,21 @@ namespace API.Controllers
         [HttpPost("Auth")]
         public ActionResult<ExportUser> Authorization([FromForm] string login, [FromForm] string password)
         {
-            User? user = Context.Users.FirstOrDefault(x => x.UEmail == login && x.UPassword == password);
+            User? user = Context.Users.FirstOrDefault(x => x.UEmail == login);
 
             if (user is null)
             {
                 return BadRequest("Неверный логин или пароль");
             }
 
-            return Ok(user.ToExport());
+            PasswordHasher<ExportUser> hasher = new();
+
+            if (hasher.VerifyHashedPassword(user.ToExport(), user.UPassword, password) == PasswordVerificationResult.Success)
+            {
+                return Ok(user.ToExport());
+            }
+
+            return BadRequest("Неверный логин или пароль");
         }
 
         [HttpPost("Register")]

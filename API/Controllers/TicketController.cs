@@ -49,14 +49,14 @@ namespace API.Controllers
 
             if (flight is null)
             {
-                return BadRequest();
+                return BadRequest("Указанный рейс не найден");
             }
 
             User? user = Context.Users.AsEnumerable().FirstOrDefault(x => x.UId == x.GetUserId(ticket.TUser));
 
             if (user is null)
             {
-                return BadRequest();
+                return BadRequest("Указанный пользователь не найден");
             }
 
             int id = Context.Tickets.Any() ? Context.Tickets.Max(x => x.TId) + 1 : 1;

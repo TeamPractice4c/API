@@ -54,7 +54,7 @@ namespace API.Controllers
 
             int id = Context.Airports.Any() ? Context.Airports.Max(x => x.ApId) + 1 : 1;
 
-            Context.Airports.Add(new()
+            Airport new_airport = new()
             {
                 ApId = id,
                 ApName = airport.ApName,
@@ -62,11 +62,13 @@ namespace API.Controllers
                 ApCity = airport.ApCity,
                 ApBuilding = airport.ApBuilding,
                 ApStreet = airport.ApStreet,
-            });
+            };
+
+            Context.Airports.Add(new_airport);
 
             Context.SaveChanges();
 
-            return Ok(airport);
+            return Ok(new_airport.ToExport());
         }
 
         [HttpPost("EditAirport")]
