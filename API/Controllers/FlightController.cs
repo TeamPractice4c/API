@@ -101,14 +101,29 @@ namespace API.Controllers
             {
                 return NotFound("Указанный рейс не найден");
             }
-            
-            int airline = Context.Airlines.First(x => x.AlName == flight.FAirline).AlId;
-            int departure_airport = Context.Airports.First(x => x.ApName == flight.FDepartureAirport).ApId;
-            int arrival_airport = Context.Airports.First(x => x.ApName == flight.FArrivalAirport).ApId;
 
-            gotten_flight.FAirline = airline;
-            gotten_flight.FArrivalAirport = arrival_airport;
-            gotten_flight.FDepartureAirport = departure_airport;
+            Airline? airline = Context.Airlines.FirstOrDefault(x => x.AlName == flight.FAirline);
+            Airport? departure_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FDepartureAirport);
+            Airport? arrival_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FArrivalAirport);
+
+            if (airline is null)
+            {
+                return BadRequest("Указанная авиакомпания не найдена");
+            }
+
+            if (departure_airport is null)
+            {
+                return BadRequest("Указанный аэропорт страны отправления не найден");
+            }
+
+            if (arrival_airport is null)
+            {
+                return BadRequest("Указанный аэропорт страны назначения не найден");
+            }
+
+            gotten_flight.FAirline = airline.AlId;
+            gotten_flight.FArrivalAirport = arrival_airport.ApId;
+            gotten_flight.FDepartureAirport = departure_airport.ApId;
             gotten_flight.FDepartureTime = flight.FDepartureTime;
             gotten_flight.FArrivalTime = flight.FArrivalTime;
             gotten_flight.FSeatsCount = flight.FSeatsCount;
