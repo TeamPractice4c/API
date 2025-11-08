@@ -1,7 +1,6 @@
 ﻿using API.ExportClasses;
 using API.Model;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection.Metadata.Ecma335;
 
 namespace API.Controllers
 {
@@ -63,7 +62,7 @@ namespace API.Controllers
             }
 
             Flight? gotten_flight = Context.Flights.FirstOrDefault(x => x.FAirline == airline.AlId &&
-            x.FArrivalAirport == arrival_airport.ApId && x.FDepartureAirport == departure_airport.ApId && 
+            x.FArrivalAirport == arrival_airport.ApId && x.FDepartureAirport == departure_airport.ApId &&
             x.FDepartureTime == flight.FDepartureTime && x.FArrivalTime == flight.FArrivalTime);
 
             if (gotten_flight is not null)
@@ -71,7 +70,7 @@ namespace API.Controllers
                 return BadRequest("Рейс с такими параметрами уже существует");
             }
 
-           int id = Context.Flights.Any() ? Context.Flights.Max(x => x.FId) + 1 : 1;
+            int id = Context.Flights.Any() ? Context.Flights.Max(x => x.FId) + 1 : 1;
 
             Flight new_flight = new()
             {

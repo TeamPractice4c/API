@@ -1,7 +1,6 @@
 using API.Enums;
 using API.Model;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Npgsql.NameTranslation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,11 +17,14 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<PostgresContext>(options => options.UseLazyLoadingProxies().UseNpgsql(conString, o =>
-         o.MapEnum<Role>("role", "skywhysales", new NpgsqlNullNameTranslator())
-        .MapEnum<TicketStatus>("ticket_status", "skywhysales", new NpgsqlNullNameTranslator())
-        .MapEnum<ClassOfService>("class_of_service", "skywhysales", new NpgsqlNullNameTranslator())
-       ), ServiceLifetime.Singleton);
+builder.Services.AddDbContext<PostgresContext>(options =>
+{
+    options.UseLazyLoadingProxies().UseNpgsql(conString, o =>
+             o.MapEnum<Role>("role", "skywhysales", new NpgsqlNullNameTranslator())
+            .MapEnum<TicketStatus>("ticket_status", "skywhysales", new NpgsqlNullNameTranslator())
+            .MapEnum<ClassOfService>("class_of_service", "skywhysales", new NpgsqlNullNameTranslator())
+       );
+}, ServiceLifetime.Singleton);
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -47,9 +49,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-
-//app.MapStaticAssets();
 app.UseStaticFiles();
 
 app.UseCors(MyAllowSpecificOrigins);

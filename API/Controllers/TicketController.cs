@@ -66,7 +66,7 @@ namespace API.Controllers
                 TId = id,
                 TFlight = flight.FId,
                 TUser = user.UId,
-                TClass = (ClassOfService)Convertation.ConvertStringToEnum<ClassOfService>(ticket.TStatus)!,
+                TClass = (ClassOfService)Convertation.ConvertStringToEnum<ClassOfService>(ticket.TClass)!,
                 TBoughtDate = DateTime.Now,
                 TTotalPrice = ticket.TTotalPrice,
                 TStatus = (TicketStatus)Convertation.ConvertStringToEnum<TicketStatus>("Куплен")!
@@ -84,10 +84,11 @@ namespace API.Controllers
         [HttpPost("ChangeTicketStatus")]
         public ActionResult<ExportTicket> ChangeTicketStatus([FromBody] ExportTicket ticket)
         {
-            Ticket? gotten_ticket = Context.Tickets.FirstOrDefault(x => x.TId ==  ticket.TId);
+            Ticket? gotten_ticket = Context.Tickets.FirstOrDefault(x => x.TId == ticket.TId);
 
-            if (gotten_ticket is null) {
-                return NotFound(); 
+            if (gotten_ticket is null)
+            {
+                return NotFound();
             }
 
             gotten_ticket.TStatus = (TicketStatus)Convertation.ConvertStringToEnum<TicketStatus>(ticket.TStatus)!;

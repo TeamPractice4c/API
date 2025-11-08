@@ -43,8 +43,8 @@ namespace API.Controllers
         [HttpPost("AddAirport")]
         public ActionResult<ExportAirport> AddAirport([FromBody] ExportAirport airport)
         {
-            Airport? gotten_airport = Context.Airports.FirstOrDefault(x => x.ApName == airport.ApName && 
-            x.ApCountry == airport.ApCountry && x.ApCity == airport.ApCity && x.ApStreet == airport.ApStreet && 
+            Airport? gotten_airport = Context.Airports.FirstOrDefault(x => x.ApName == airport.ApName &&
+            x.ApCountry == airport.ApCountry && x.ApCity == airport.ApCity && x.ApStreet == airport.ApStreet &&
             x.ApBuilding == airport.ApBuilding);
 
             if (gotten_airport is not null)

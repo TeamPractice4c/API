@@ -16,7 +16,7 @@ namespace API.Controllers
         [HttpGet("GetUsers")]
         public ActionResult<List<ExportUser>> GetUsers()
         {
-            
+
             List<User> users = [.. Context.Users];
 
             if (users is null || users.Count == 0)
@@ -89,7 +89,17 @@ namespace API.Controllers
                 return BadRequest("Указанный логин занят");
             }
 
+            if (Context.Users.Any(x => x.UPassportNumber == user.UPassportNumber))
+            {
+                return BadRequest("Указаный номер пасспорта уже используется");
+            }
+
             int id = Context.Users.Any() ? Context.Users.Max(x => x.UId) + 1 : 1;
+
+            if (Context.Users.FirstOrDefault(x => x.UId == id) != null)
+            {
+                return BadRequest();
+            }
 
             PasswordHasher<ExportUser> hasher = new();
             string enc_password = hasher.HashPassword(user, user.UPassword);
@@ -108,11 +118,12 @@ namespace API.Controllers
                 UPassportSerial = user.UPassportSerial,
             };
 
-            SendEmail.SendLoginInformation(user.UEmail, user.UPassword);
-
             Context.Users.Add(new_user);
 
             Context.SaveChanges();
+
+            SendEmail.SendLoginInformation(user.UEmail, user.UPassword);
+
 
             return Ok(new_user.ToExport());
         }
@@ -164,22 +175,22 @@ namespace API.Controllers
             return Ok(gotten_user.ToExport());
         }
 
-/*        [HttpPost("Upload")]
-        [RequestSizeLimit(10_000_000)]
-        public async Task<IActionResult> Upload([FromForm] UploadFile file)
-        {
-            if (file.File == null || file.File.Length == 0)
-            {
-                return BadRequest("Файл изображения не передан или пустой.");
-            }
+        /*        [HttpPost("Upload")]
+                [RequestSizeLimit(10_000_000)]
+                public async Task<IActionResult> Upload([FromForm] UploadFile file)
+                {
+                    if (file.File == null || file.File.Length == 0)
+                    {
+                        return BadRequest("Файл изображения не передан или пустой.");
+                    }
 
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", file.File.FileName);
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                await file.File.CopyToAsync(stream);
-            }
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", file.File.FileName);
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.File.CopyToAsync(stream);
+                    }
 
-            return Ok();
-        }*/
+                    return Ok();
+                }*/
     }
 }
