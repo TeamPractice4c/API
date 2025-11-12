@@ -34,6 +34,9 @@ public partial class User
 
     internal ExportUser ToExport()
     {
+        string[] files = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/user/"));
+        string file = files.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == UId.ToString()) ?? "";
+
         return new()
         {
             UId = UId,
@@ -47,6 +50,7 @@ public partial class User
             UBirthdate = UBirthdate,
             UPatronymic = UPatronymic,
             URole = Convertation.ConvertEnumToString(URole),
+            UserImage = "/user/" + Path.GetFileName(file),
         };
     }
 

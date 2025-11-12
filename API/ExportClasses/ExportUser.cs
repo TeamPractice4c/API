@@ -26,5 +26,6 @@ namespace API.ExportClasses
 
         public decimal UPassportNumber { get; set; }
 
+        public string UserImage { get; set; } = null!;
     }
 }

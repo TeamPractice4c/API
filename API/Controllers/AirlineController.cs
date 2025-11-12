@@ -1,4 +1,5 @@
 ﻿using API.ExportClasses;
+using API.InternalClasses;
 using API.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -99,6 +100,36 @@ namespace API.Controllers
             Context.Airlines.Remove(airline);
 
             Context.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpPost("UploadAirlineImage")]
+        [RequestSizeLimit(10_000_000)]
+        public async Task<IActionResult> Upload([FromForm] UploadFile file, [FromForm] int airlineId)
+        {
+            if (file.File is null || file.File.Length == 0)
+            {
+                return BadRequest("Файл изображения не передан или пустой.");
+            }
+
+            if (Context.Airlines.Any(x => x.AlId == airlineId))
+            {
+                return NotFound("Указанная авиакомпания не найдена");
+            }
+
+            string airlinePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/airline/");
+
+            if (!Directory.Exists(airlinePath))
+            {
+                Directory.CreateDirectory(airlinePath);
+            }
+
+            var path = Path.Combine(airlinePath, $"{airlineId}{Path.GetExtension(file.File.FileName)}");
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.File.CopyToAsync(stream);
+            }
 
             return Ok();
         }

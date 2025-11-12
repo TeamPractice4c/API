@@ -32,6 +32,9 @@ public partial class Flight
 
     public ExportFlight ToExport()
     {
+        string[] files = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/airline/"));
+        string file = files.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == FAirline.ToString()) ?? "";
+
         return new()
         {
             FId = FId,
@@ -42,6 +45,7 @@ public partial class Flight
             FArrivalTime = FArrivalTime,
             FSeatsCount = FSeatsCount,
             FPrice = FPrice,
+            AirlineImage = "/airline/" + Path.GetFileName(file),
         };
     }
 }

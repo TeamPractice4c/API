@@ -89,12 +89,17 @@ namespace API.Controllers
                 return BadRequest("Указанный логин занят");
             }
 
+            if (Context.Users.Any(x => x.UPhone == user.UPhone))
+            {
+                return BadRequest("Указаный номер телефона занят");
+            }
+
             if (Context.Users.Any(x => x.UPassportNumber == user.UPassportNumber))
             {
                 return BadRequest("Указаный номер пасспорта уже используется");
             }
 
-            int id = Context.Users.Any() ? Context.Users.Max(x => x.UId) + 1 : 1;
+            int id = Guid.NewGuid().GetHashCode();
 
             if (Context.Users.FirstOrDefault(x => x.UId == id) != null)
             {
@@ -159,6 +164,11 @@ namespace API.Controllers
                 return BadRequest("Пользователь не найден");
             }
 
+            if (gotten_user.UPhone == user.UPhone)
+            {
+                return BadRequest("Указанный номер телеофна занят");
+            }
+
             gotten_user.UName = user.UName;
             gotten_user.USurname = user.USurname;
             gotten_user.UPatronymic = user.UPatronymic;
@@ -175,22 +185,34 @@ namespace API.Controllers
             return Ok(gotten_user.ToExport());
         }
 
-        /*        [HttpPost("Upload")]
-                [RequestSizeLimit(10_000_000)]
-                public async Task<IActionResult> Upload([FromForm] UploadFile file)
-                {
-                    if (file.File == null || file.File.Length == 0)
-                    {
-                        return BadRequest("Файл изображения не передан или пустой.");
-                    }
+        [HttpPost("UploadUserImage")]
+        [RequestSizeLimit(10_000_000)]
+        public async Task<IActionResult> UploadUserImage([FromForm] UploadFile file, [FromForm] int userId)
+        {
+            if (file.File is null || file.File.Length == 0)
+            {
+                return BadRequest("Файл изображения не передан или пустой.");
+            }
 
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", file.File.FileName);
-                    using (var stream = new FileStream(path, FileMode.Create))
-                    {
-                        await file.File.CopyToAsync(stream);
-                    }
+            if (Context.Users.Any(x => x.UId == userId))
+            {
+                return BadRequest("Пользователь не найден");
+            }
 
-                    return Ok();
-                }*/
+            string userPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/user/");
+
+            if (!Directory.Exists(userPath))
+            {
+                Directory.CreateDirectory(userPath);
+            }
+
+            var path = Path.Combine(userPath, $"{userId}{Path.GetExtension(file.File.FileName)}");
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.File.CopyToAsync(stream);
+            }
+
+            return Ok();
+        }
     }
 }
