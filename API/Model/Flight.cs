@@ -32,7 +32,12 @@ public partial class Flight
 
     public ExportFlight ToExport()
     {
-        string[] files = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/airline/"));
+        string[] files = [];
+        if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/airline/")))
+        {
+            files = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/airline/"));
+        }
+
         string file = files.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == FAirline.ToString()) ?? "";
 
         return new()

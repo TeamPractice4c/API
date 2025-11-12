@@ -82,7 +82,7 @@ namespace API.Controllers
         }
 
         [HttpPost("Register")]
-        public ActionResult<ExportUser> Register([FromBody] ExportUser user)
+        public async Task<IActionResult> Register([FromBody] ExportUser user)
         {
             if (Context.Users.Any(x => x.UEmail == user.UEmail))
             {
@@ -99,7 +99,7 @@ namespace API.Controllers
                 return BadRequest("Указаный номер пасспорта уже используется");
             }
 
-            int id = Guid.NewGuid().GetHashCode();
+            int id = Context.Users.Any() ? Context.Users.Max(x => x.UId) + 1 : 1;
 
             if (Context.Users.FirstOrDefault(x => x.UId == id) != null)
             {
@@ -123,9 +123,9 @@ namespace API.Controllers
                 UPassportSerial = user.UPassportSerial,
             };
 
-            Context.Users.Add(new_user);
+            await Context.Users.AddAsync(new_user);
 
-            Context.SaveChanges();
+            await Context.SaveChangesAsync();
 
             SendEmail.SendLoginInformation(user.UEmail, user.UPassword);
 

@@ -18,6 +18,6 @@
 
         public int FPrice { get; set;  }
 
-        public string AirlineImage { get; set; } = null!;
+        public string? AirlineImage { get; set; }
     }
 }

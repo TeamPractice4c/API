@@ -34,7 +34,12 @@ public partial class User
 
     internal ExportUser ToExport()
     {
-        string[] files = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/user/"));
+        string[] files = [];
+        if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/user/")))
+        {
+            files = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/user/"));
+        }
+
         string file = files.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == UId.ToString()) ?? "";
 
         return new()
