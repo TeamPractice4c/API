@@ -1,6 +1,4 @@
-﻿using API.Enums;
-
-namespace API.ExportClasses
+﻿namespace API.ExportClasses
 {
     public class ExportUser
     {

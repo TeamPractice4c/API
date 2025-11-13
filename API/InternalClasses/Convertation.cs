@@ -65,7 +65,7 @@ namespace API.InternalClasses
                 {
                     "Бизнес" => ClassOfService.Бизнес,
                     "Эконом" => ClassOfService.Эконом,
-                    "Первый_класс" => ClassOfService.Первый_класс,
+                    "Первый класс" => ClassOfService.Первый_класс,
                     "Комфорт" => ClassOfService.Комфорт,
                     _ => ClassOfService.Эконом
                 };

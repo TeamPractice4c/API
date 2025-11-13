@@ -4,6 +4,7 @@ using API.InternalClasses;
 using API.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -11,13 +12,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class UserController(PostgresContext context) : ControllerBase
     {
-        private readonly PostgresContext Context = context;
+        private readonly PostgresContext _context = context;
 
         [HttpGet("GetUsers")]
-        public ActionResult<List<ExportUser>> GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
-
-            List<User> users = [.. Context.Users];
+            List<User> users = await _context.Users.ToListAsync();
 
             if (users is null || users.Count == 0)
             {
@@ -31,9 +31,9 @@ namespace API.Controllers
         }
 
         [HttpGet("GetUser/{id}")]
-        public ActionResult<ExportUser> GetUser(int id)
+        public async Task<IActionResult> GetUser(int id)
         {
-            User? user = Context.Users.FirstOrDefault(x => x.UId == id);
+            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UId == id);
 
             if (user is null)
             {
@@ -44,27 +44,27 @@ namespace API.Controllers
         }
 
         [HttpDelete("DeleteUser/{id}")]
-        public ActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            User? user = Context.Users.FirstOrDefault(x => x.UId == id);
+            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UId == id);
 
             if (user is null)
             {
                 return NotFound("Пользователь не найден");
             }
 
-            Context.Users.Remove(user);
+            _context.Users.Remove(user);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok();
         }
 
 
         [HttpPost("Auth")]
-        public ActionResult<ExportUser> Authorization([FromForm] string login, [FromForm] string password)
+        public async Task<IActionResult> Authorization([FromForm] string login, [FromForm] string password)
         {
-            User? user = Context.Users.FirstOrDefault(x => x.UEmail == login);
+            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UEmail == login);
 
             if (user is null)
             {
@@ -84,30 +84,30 @@ namespace API.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] ExportUser user)
         {
-            if (Context.Users.Any(x => x.UEmail == user.UEmail))
+            if (await _context.Users.AnyAsync(x => x.UEmail == user.UEmail))
             {
                 return BadRequest("Указанный логин занят");
             }
 
-            if (Context.Users.Any(x => x.UPhone == user.UPhone))
+            if (await _context.Users.AnyAsync(x => x.UPhone == user.UPhone))
             {
                 return BadRequest("Указаный номер телефона занят");
             }
 
-            if (Context.Users.Any(x => x.UPassportNumber == user.UPassportNumber))
+            if (await _context.Users.AnyAsync(x => x.UPassportNumber == user.UPassportNumber))
             {
                 return BadRequest("Указаный номер пасспорта уже используется");
             }
 
-            int id = Context.Users.Any() ? Context.Users.Max(x => x.UId) + 1 : 1;
+            int id = await _context.Users.AnyAsync() ? await _context.Users.MaxAsync(x => x.UId) + 1 : 1;
 
-            if (Context.Users.FirstOrDefault(x => x.UId == id) != null)
+            if (await _context.Users.FirstOrDefaultAsync(x => x.UId == id) != null)
             {
                 return BadRequest();
             }
 
             PasswordHasher<ExportUser> hasher = new();
-            string enc_password = hasher.HashPassword(user, user.UPassword);
+            string encPassword = hasher.HashPassword(user, user.UPassword);
             User new_user = new()
             {
                 UId = id,
@@ -115,7 +115,7 @@ namespace API.Controllers
                 USurname = user.USurname,
                 UPatronymic = user.UPatronymic,
                 UEmail = user.UEmail,
-                UPassword = enc_password,
+                UPassword = encPassword,
                 URole = (Role)Convertation.ConvertStringToEnum<Role>("Клиент")!,
                 UPhone = user.UPhone,
                 UBirthdate = user.UBirthdate,
@@ -123,66 +123,66 @@ namespace API.Controllers
                 UPassportSerial = user.UPassportSerial,
             };
 
-            await Context.Users.AddAsync(new_user);
+            _context.Users.Add(new_user);
 
-            await Context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-            SendEmail.SendLoginInformation(user.UEmail, user.UPassword);
+            await SendEmail.SendLoginInformationAsync(user.UEmail, user.UPassword);
 
 
             return Ok(new_user.ToExport());
         }
 
         [HttpPost("ChangePassword")]
-        public ActionResult<ExportUser> ChangeUserPassword([FromBody] ExportUser user)
+        public async Task<IActionResult> ChangeUserPassword([FromBody] ExportUser user)
         {
-            User? gotten_user = Context.Users.FirstOrDefault(x => x.UId == user.UId);
+            User? gottenUser = await _context.Users.FirstOrDefaultAsync(x => x.UId == user.UId);
 
-            if (gotten_user is null)
+            if (gottenUser is null)
             {
                 return BadRequest("Пользователь не найден");
             }
 
             PasswordHasher<ExportUser> hasher = new();
-            string new_password = hasher.HashPassword(gotten_user.ToExport(), user.UPassword);
+            string newPassword = hasher.HashPassword(gottenUser.ToExport(), user.UPassword);
 
-            gotten_user.UPassword = new_password;
+            gottenUser.UPassword = newPassword;
 
-            Context.Users.Update(gotten_user);
-            Context.SaveChanges();
+            _context.Users.Update(gottenUser);
+            await _context.SaveChangesAsync();
 
-            return Ok(gotten_user.ToExport());
+            return Ok(gottenUser.ToExport());
         }
 
         [HttpPost("EditUser")]
-        public ActionResult<ExportUser> EditUserInfo([FromBody] ExportUser user)
+        public async Task<IActionResult> EditUserInfo([FromBody] ExportUser user)
         {
-            User? gotten_user = Context.Users.FirstOrDefault(x => x.UId == user.UId);
+            User? gottenUser = await _context.Users.FirstOrDefaultAsync(x => x.UId == user.UId);
 
-            if (gotten_user is null)
+            if (gottenUser is null)
             {
                 return BadRequest("Пользователь не найден");
             }
 
-            if (gotten_user.UPhone == user.UPhone)
+            if (gottenUser.UPhone == user.UPhone)
             {
                 return BadRequest("Указанный номер телеофна занят");
             }
 
-            gotten_user.UName = user.UName;
-            gotten_user.USurname = user.USurname;
-            gotten_user.UPatronymic = user.UPatronymic;
-            gotten_user.UPhone = user.UPhone;
-            gotten_user.UEmail = user.UEmail;
-            gotten_user.UPassportSerial = user.UPassportSerial;
-            gotten_user.UPassportNumber = user.UPassportNumber;
-            gotten_user.UBirthdate = user.UBirthdate;
+            gottenUser.UName = user.UName;
+            gottenUser.USurname = user.USurname;
+            gottenUser.UPatronymic = user.UPatronymic;
+            gottenUser.UPhone = user.UPhone;
+            gottenUser.UEmail = user.UEmail;
+            gottenUser.UPassportSerial = user.UPassportSerial;
+            gottenUser.UPassportNumber = user.UPassportNumber;
+            gottenUser.UBirthdate = user.UBirthdate;
 
 
-            Context.Users.Update(gotten_user);
-            Context.SaveChanges();
+            _context.Users.Update(gottenUser);
+            await _context.SaveChangesAsync();
 
-            return Ok(gotten_user.ToExport());
+            return Ok(gottenUser.ToExport());
         }
 
         [HttpPost("UploadUserImage")]
@@ -194,7 +194,7 @@ namespace API.Controllers
                 return BadRequest("Файл изображения не передан или пустой.");
             }
 
-            if (Context.Users.Any(x => x.UId == userId))
+            if (!await _context.Users.AnyAsync(x => x.UId == userId))
             {
                 return BadRequest("Пользователь не найден");
             }

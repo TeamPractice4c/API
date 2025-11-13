@@ -2,6 +2,7 @@
 using API.InternalClasses;
 using API.Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -9,12 +10,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class AirlineController(PostgresContext context) : ControllerBase
     {
-        public PostgresContext Context = context;
+        private readonly PostgresContext _context = context;
 
         [HttpGet("GetAirlines")]
-        public ActionResult<List<ExportAirline>> GetAirlines()
+        public async Task<IActionResult> GetAirlines()
         {
-            List<Airline> airlines = [.. Context.Airlines];
+            List<Airline> airlines = await _context.Airlines.ToListAsync();
 
             if (airlines is null || airlines.Count == 0)
             {
@@ -29,9 +30,9 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAirline/{id}")]
-        public ActionResult<ExportAirline> GetAirline(int id)
+        public async Task<IActionResult> GetAirline(int id)
         {
-            Airline? airline = Context.Airlines.FirstOrDefault(x => x.AlId == id);
+            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlId == id);
 
             if (airline is null)
             {
@@ -42,78 +43,78 @@ namespace API.Controllers
         }
 
         [HttpPost("AddAirline")]
-        public ActionResult<ExportAirline> AddAirline([FromBody] ExportAirline airline)
+        public async Task<IActionResult> AddAirline([FromBody] ExportAirline airline)
         {
-            Airline? gotten_airline = Context.Airlines.FirstOrDefault(x => x.AlName == airline.AlName);
+            Airline? gottenAirline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlName == airline.AlName);
 
-            if (gotten_airline is not null)
+            if (gottenAirline is not null)
             {
                 return BadRequest("Авиакомпания с такими параметрами уже существует");
             }
 
-            int id = Context.Airlines.Any() ? Context.Airlines.Max(x => x.AlId) + 1 : 1;
+            int id = await _context.Airlines.AnyAsync() ? await _context.Airlines.MaxAsync(x => x.AlId) + 1 : 1;
 
-            Airline new_airline = new()
+            Airline newAirline = new()
             {
                 AlId = id,
                 AlName = airline.AlName,
                 AlEmail = airline.AlEmail,
             };
 
-            Context.Airlines.Add(new_airline);
+            _context.Airlines.Add(newAirline);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return Ok(new_airline.ToExport());
+            return Ok(newAirline.ToExport());
         }
 
         [HttpPost("EditAirline")]
-        public ActionResult<ExportAirline> EditAirline([FromBody] ExportAirline airline)
+        public async Task<IActionResult> EditAirline([FromBody] ExportAirline airline)
         {
-            Airline? gotten_airline = Context.Airlines.FirstOrDefault(x => x.AlId == airline.AlId);
+            Airline? gottenAirline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlId == airline.AlId);
 
-            if (gotten_airline is null)
+            if (gottenAirline is null)
             {
                 return BadRequest("Указанная авиакомпания не найдена");
             }
 
-            gotten_airline.AlName = airline.AlName;
-            gotten_airline.AlEmail = airline.AlEmail;
+            gottenAirline.AlName = airline.AlName;
+            gottenAirline.AlEmail = airline.AlEmail;
 
-            Context.Airlines.Update(gotten_airline);
+            _context.Airlines.Update(gottenAirline);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return Ok(gotten_airline.ToExport());
+            return Ok(gottenAirline.ToExport());
         }
 
         [HttpDelete("DeleteAirline/{id}")]
-        public ActionResult DeleteAirline(int id)
+        public async Task<IActionResult> DeleteAirline(int id)
         {
-            Airline? airline = Context.Airlines.FirstOrDefault(x => x.AlId == id);
+            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlId == id);
 
             if (airline is null)
             {
                 return NotFound("Указанная авиакомпания не найдена");
             }
 
-            Context.Airlines.Remove(airline);
+            _context.Airlines.Remove(airline);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok();
         }
 
         [HttpPost("UploadAirlineImage")]
         [RequestSizeLimit(10_000_000)]
-        public async Task<IActionResult> Upload([FromForm] UploadFile file, [FromForm] int airlineId)
+        public async Task<IActionResult> UploadAirlineImage([FromForm] UploadFile file, [FromForm] int airlineId)
         {
             if (file.File is null || file.File.Length == 0)
             {
                 return BadRequest("Файл изображения не передан или пустой.");
             }
 
-            if (Context.Airlines.Any(x => x.AlId == airlineId))
+            if (!await _context.Airlines.AnyAsync(x => x.AlId == airlineId))
             {
                 return NotFound("Указанная авиакомпания не найдена");
             }

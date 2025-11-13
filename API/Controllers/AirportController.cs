@@ -1,6 +1,7 @@
 ﻿using API.ExportClasses;
 using API.Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -8,12 +9,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class AirportController(PostgresContext context) : ControllerBase
     {
-        public PostgresContext Context = context;
+        private readonly PostgresContext _context = context;
 
         [HttpGet("GetAirports")]
-        public ActionResult<List<ExportAirport>> GetAirports()
+        public async Task<IActionResult> GetAirports()
         {
-            List<Airport> airports = [.. Context.Airports];
+            List<Airport> airports = await _context.Airports.ToListAsync();
 
             if (airports is null || airports.Count == 0)
             {
@@ -28,9 +29,9 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAirport/{id}")]
-        public ActionResult<ExportAirport> GetAiport(int id)
+        public async Task<IActionResult> GetAiport(int id)
         {
-            Airport? airport = Context.Airports.FirstOrDefault(x => x.ApId == id);
+            Airport? airport = await _context.Airports.FirstOrDefaultAsync(x => x.ApId == id);
 
             if (airport is null)
             {
@@ -41,20 +42,20 @@ namespace API.Controllers
         }
 
         [HttpPost("AddAirport")]
-        public ActionResult<ExportAirport> AddAirport([FromBody] ExportAirport airport)
+        public async Task<IActionResult> AddAirport([FromBody] ExportAirport airport)
         {
-            Airport? gotten_airport = Context.Airports.FirstOrDefault(x => x.ApName == airport.ApName &&
+            Airport? gottenAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == airport.ApName &&
             x.ApCountry == airport.ApCountry && x.ApCity == airport.ApCity && x.ApStreet == airport.ApStreet &&
             x.ApBuilding == airport.ApBuilding);
 
-            if (gotten_airport is not null)
+            if (gottenAirport is not null)
             {
                 return BadRequest("Аэропорт с такими параметрами уже существует");
             }
 
-            int id = Context.Airports.Any() ? Context.Airports.Max(x => x.ApId) + 1 : 1;
+            int id = await _context.Airports.AnyAsync() ? await _context.Airports.MaxAsync(x => x.ApId) + 1 : 1;
 
-            Airport new_airport = new()
+            Airport newAirport = new()
             {
                 ApId = id,
                 ApName = airport.ApName,
@@ -64,49 +65,49 @@ namespace API.Controllers
                 ApStreet = airport.ApStreet,
             };
 
-            Context.Airports.Add(new_airport);
+            _context.Airports.Add(newAirport);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return Ok(new_airport.ToExport());
+            return Ok(newAirport.ToExport());
         }
 
         [HttpPost("EditAirport")]
-        public ActionResult<ExportAirport> EditAirport([FromBody] ExportAirport airport)
+        public async Task<IActionResult> EditAirport([FromBody] ExportAirport airport)
         {
-            Airport? gotten_airport = Context.Airports.FirstOrDefault(x => x.ApId == airport.ApId);
+            Airport? gottenAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApId == airport.ApId);
 
-            if (gotten_airport is null)
+            if (gottenAirport is null)
             {
                 return BadRequest("Указанный аэропорт не найден");
             }
 
-            gotten_airport.ApName = airport.ApName;
-            gotten_airport.ApCountry = airport.ApCountry;
-            gotten_airport.ApCity = airport.ApCity;
-            gotten_airport.ApStreet = airport.ApStreet;
-            gotten_airport.ApBuilding = airport.ApBuilding;
+            gottenAirport.ApName = airport.ApName;
+            gottenAirport.ApCountry = airport.ApCountry;
+            gottenAirport.ApCity = airport.ApCity;
+            gottenAirport.ApStreet = airport.ApStreet;
+            gottenAirport.ApBuilding = airport.ApBuilding;
 
-            Context.Airports.Update(gotten_airport);
+            _context.Airports.Update(gottenAirport);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return Ok(gotten_airport.ToExport());
+            return Ok(gottenAirport.ToExport());
         }
 
         [HttpDelete("DeleteAirport/{id}")]
-        public ActionResult DeleteAirport(int id)
+        public async Task<IActionResult> DeleteAirport(int id)
         {
-            Airport? airport = Context.Airports.FirstOrDefault(x => x.ApId == id);
+            Airport? airport = await _context.Airports.FirstOrDefaultAsync(x => x.ApId == id);
 
             if (airport is null)
             {
                 return NotFound("Указанный аэропорт не найден");
             }
 
-            Context.Airports.Remove(airport);
+            _context.Airports.Remove(airport);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok();
         }

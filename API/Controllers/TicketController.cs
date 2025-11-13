@@ -3,6 +3,7 @@ using API.InternalClasses;
 using API.ExportClasses;
 using API.Model;
 using API.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -10,12 +11,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class TicketController(PostgresContext context) : ControllerBase
     {
-        private readonly PostgresContext Context = context;
+        private readonly PostgresContext _context = context;
 
         [HttpGet("GetTickets")]
-        public ActionResult<List<ExportTicket>> GetTickets()
+        public async Task<IActionResult> GetTickets()
         {
-            List<Ticket> tickets = [.. Context.Tickets];
+            List<Ticket> tickets = await _context.Tickets.ToListAsync();
 
             if (tickets is null || tickets.Count == 0)
             {
@@ -30,9 +31,9 @@ namespace API.Controllers
         }
 
         [HttpGet("GetTicket/{id}")]
-        public ActionResult<ExportTicket> GetTicket(int id)
+        public async Task<IActionResult> GetTicket(int id)
         {
-            Ticket? ticket = Context.Tickets.FirstOrDefault(x => x.TId == id);
+            Ticket? ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.TId == id);
 
             if (ticket is null)
             {
@@ -43,25 +44,25 @@ namespace API.Controllers
         }
 
         [HttpPost("AddTicket")]
-        public ActionResult<ExportTicket> AddTicket([FromBody] ExportTicket ticket)
+        public async Task<IActionResult> AddTicket([FromBody] ExportTicket ticket)
         {
-            Flight? flight = Context.Flights.FirstOrDefault(x => x.FId == ticket.TFlight);
+            Flight? flight = await _context.Flights.FirstOrDefaultAsync(x => x.FId == ticket.TFlight);
 
             if (flight is null)
             {
                 return BadRequest("Указанный рейс не найден");
             }
 
-            User? user = Context.Users.AsEnumerable().FirstOrDefault(x => x.UId == x.GetUserId(ticket.TUser));
+            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UId == x.GetUserId(ticket.TUser));
 
             if (user is null)
             {
                 return BadRequest("Указанный пользователь не найден");
             }
 
-            int id = Context.Tickets.Any() ? Context.Tickets.Max(x => x.TId) + 1 : 1;
+            int id = await _context.Tickets.AnyAsync() ? await _context.Tickets.MaxAsync(x => x.TId) + 1 : 1;
 
-            Ticket new_ticket = new()
+            Ticket newTicket = new()
             {
                 TId = id,
                 TFlight = flight.FId,
@@ -72,30 +73,32 @@ namespace API.Controllers
                 TStatus = (TicketStatus)Convertation.ConvertStringToEnum<TicketStatus>("Куплен")!
             };
 
-            Context.Tickets.Add(new_ticket);
+            _context.Tickets.Add(newTicket);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            SendEmail.SendTicket(Context, id);
+            await SendEmail.SendTicketAsync(_context, id);
 
-            return Ok(new_ticket.ToExport());
+            return Ok(newTicket.ToExport());
         }
 
         [HttpPost("ChangeTicketStatus")]
-        public ActionResult<ExportTicket> ChangeTicketStatus([FromBody] ExportTicket ticket)
+        public async Task<IActionResult> ChangeTicketStatus([FromBody] ExportTicket ticket)
         {
-            Ticket? gotten_ticket = Context.Tickets.FirstOrDefault(x => x.TId == ticket.TId);
+            Ticket? gottenTicket = await _context.Tickets.FirstOrDefaultAsync(x => x.TId == ticket.TId);
 
-            if (gotten_ticket is null)
+            if (gottenTicket is null)
             {
                 return NotFound();
             }
 
-            gotten_ticket.TStatus = (TicketStatus)Convertation.ConvertStringToEnum<TicketStatus>(ticket.TStatus)!;
+            gottenTicket.TStatus = (TicketStatus)Convertation.ConvertStringToEnum<TicketStatus>(ticket.TStatus)!;
 
-            Context.Tickets.Update(gotten_ticket);
+            _context.Tickets.Update(gottenTicket);
 
-            return Ok(gotten_ticket.ToExport());
+            await _context.SaveChangesAsync();
+
+            return Ok(gottenTicket.ToExport());
         }
     }
 }

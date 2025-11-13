@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var conString = builder.Configuration.GetConnectionString("BloggingDatabase") ?? throw new InvalidOperationException("Connection string 'BloggingDatabase' not found.");
+var conString = builder.Configuration.GetConnectionString("DatabaseConnection") ?? throw new InvalidOperationException("Connection string 'DatabaseConnection' not found.");
 
 var clientAddress = builder.Configuration["Addresses:Client"] ?? throw new InvalidOperationException("Address string 'Client' not found");
 
@@ -17,20 +17,20 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<PostgresContext>(options =>
+builder.Services.AddDbContext<PostgresContext>((options) =>
 {
     options.UseLazyLoadingProxies().UseNpgsql(conString, o =>
-             o.MapEnum<Role>("role", "skywhysales", new NpgsqlNullNameTranslator())
-            .MapEnum<TicketStatus>("ticket_status", "skywhysales", new NpgsqlNullNameTranslator())
-            .MapEnum<ClassOfService>("class_of_service", "skywhysales", new NpgsqlNullNameTranslator())
+         o.MapEnum<Role>("role", "skywhysales", new NpgsqlNullNameTranslator())
+        .MapEnum<TicketStatus>("ticket_status", "skywhysales", new NpgsqlNullNameTranslator())
+        .MapEnum<ClassOfService>("class_of_service", "skywhysales", new NpgsqlNullNameTranslator())
        );
 }, ServiceLifetime.Singleton);
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(MyAllowSpecificOrigins,
+    options.AddPolicy(myAllowSpecificOrigins,
                           policy =>
                           {
                               policy.WithOrigins(clientAddress)
@@ -51,7 +51,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors(myAllowSpecificOrigins);
 
 app.UseAuthorization();
 

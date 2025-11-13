@@ -1,6 +1,7 @@
 ﻿using API.ExportClasses;
 using API.Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -8,12 +9,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class FlightController(PostgresContext context) : ControllerBase
     {
-        private readonly PostgresContext Context = context;
+        private readonly PostgresContext _context = context;
 
         [HttpGet("GetFlights")]
-        public ActionResult<List<ExportFlight>> GetFlights()
+        public async Task<IActionResult> GetFlights()
         {
-            List<Flight> flights = [.. Context.Flights];
+            List<Flight> flights = await _context.Flights.ToListAsync();
 
             if (flights is null || flights.Count == 0)
             {
@@ -27,9 +28,9 @@ namespace API.Controllers
         }
 
         [HttpGet("GetFlight/{id}")]
-        public ActionResult<ExportFlight> GetFlight(int id)
+        public async Task<IActionResult> GetFlight(int id)
         {
-            Flight? flight = Context.Flights.FirstOrDefault(x => x.FId == id);
+            Flight? flight = await _context.Flights.FirstOrDefaultAsync(x => x.FId == id);
 
             if (flight is null)
             {
@@ -40,98 +41,98 @@ namespace API.Controllers
         }
 
         [HttpPost("AddFlight")]
-        public ActionResult<ExportFlight> AddFlight([FromBody] ExportFlight flight)
+        public async Task<IActionResult> AddFlight([FromBody] ExportFlight flight)
         {
-            Airline? airline = Context.Airlines.FirstOrDefault(x => x.AlName == flight.FAirline);
-            Airport? departure_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FDepartureAirport);
-            Airport? arrival_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FArrivalAirport);
+            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlName == flight.FAirline);
+            Airport? departureAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FDepartureAirport);
+            Airport? arrivalAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FArrivalAirport);
 
             if (airline is null)
             {
                 return BadRequest("Указанная авиакомпания не найдена");
             }
 
-            if (departure_airport is null)
+            if (departureAirport is null)
             {
                 return BadRequest("Указанный аэропорт страны отправления не найден");
             }
 
-            if (arrival_airport is null)
+            if (arrivalAirport is null)
             {
                 return BadRequest("Указанный аэропорт страны назначения не найден");
             }
 
-            Flight? gotten_flight = Context.Flights.FirstOrDefault(x => x.FAirline == airline.AlId &&
-            x.FArrivalAirport == arrival_airport.ApId && x.FDepartureAirport == departure_airport.ApId &&
+            Flight? gottenFlight = await _context.Flights.FirstOrDefaultAsync(x => x.FAirline == airline.AlId &&
+            x.FArrivalAirport == arrivalAirport.ApId && x.FDepartureAirport == departureAirport.ApId &&
             x.FDepartureTime == flight.FDepartureTime && x.FArrivalTime == flight.FArrivalTime);
 
-            if (gotten_flight is not null)
+            if (gottenFlight is not null)
             {
                 return BadRequest("Рейс с такими параметрами уже существует");
             }
 
-            int id = Context.Flights.Any() ? Context.Flights.Max(x => x.FId) + 1 : 1;
+            int id = await _context.Flights.AnyAsync() ? await _context.Flights.MaxAsync(x => x.FId) + 1 : 1;
 
-            Flight new_flight = new()
+            Flight newFlight = new()
             {
                 FId = id,
                 FAirline = airline.AlId,
-                FDepartureAirport = departure_airport.ApId,
-                FArrivalAirport = arrival_airport.ApId,
+                FDepartureAirport = departureAirport.ApId,
+                FArrivalAirport = arrivalAirport.ApId,
                 FDepartureTime = flight.FDepartureTime,
                 FArrivalTime = flight.FArrivalTime,
                 FSeatsCount = flight.FSeatsCount,
                 FPrice = flight.FPrice,
             };
 
-            Context.Flights.Add(new_flight);
+            _context.Flights.Add(newFlight);
 
-            Context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return Ok(new_flight.ToExport());
+            return Ok(newFlight.ToExport());
         }
 
         [HttpPost("EditFlight")]
-        public ActionResult<ExportFlight> EditFlight([FromBody] ExportFlight flight)
+        public async Task<IActionResult> EditFlight([FromBody] ExportFlight flight)
         {
-            Flight? gotten_flight = Context.Flights.FirstOrDefault(x => x.FId == flight.FId);
+            Flight? gottenFlight = await _context.Flights.FirstOrDefaultAsync(x => x.FId == flight.FId);
 
-            if (gotten_flight is null)
+            if (gottenFlight is null)
             {
                 return NotFound("Указанный рейс не найден");
             }
 
-            Airline? airline = Context.Airlines.FirstOrDefault(x => x.AlName == flight.FAirline);
-            Airport? departure_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FDepartureAirport);
-            Airport? arrival_airport = Context.Airports.FirstOrDefault(x => x.ApName == flight.FArrivalAirport);
+            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlName == flight.FAirline);
+            Airport? departutrAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FDepartureAirport);
+            Airport? arrivalAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FArrivalAirport);
 
             if (airline is null)
             {
                 return BadRequest("Указанная авиакомпания не найдена");
             }
 
-            if (departure_airport is null)
+            if (departutrAirport is null)
             {
                 return BadRequest("Указанный аэропорт страны отправления не найден");
             }
 
-            if (arrival_airport is null)
+            if (arrivalAirport is null)
             {
                 return BadRequest("Указанный аэропорт страны назначения не найден");
             }
 
-            gotten_flight.FAirline = airline.AlId;
-            gotten_flight.FArrivalAirport = arrival_airport.ApId;
-            gotten_flight.FDepartureAirport = departure_airport.ApId;
-            gotten_flight.FDepartureTime = flight.FDepartureTime;
-            gotten_flight.FArrivalTime = flight.FArrivalTime;
-            gotten_flight.FSeatsCount = flight.FSeatsCount;
-            gotten_flight.FPrice = flight.FPrice;
+            gottenFlight.FAirline = airline.AlId;
+            gottenFlight.FArrivalAirport = arrivalAirport.ApId;
+            gottenFlight.FDepartureAirport = departutrAirport.ApId;
+            gottenFlight.FDepartureTime = flight.FDepartureTime;
+            gottenFlight.FArrivalTime = flight.FArrivalTime;
+            gottenFlight.FSeatsCount = flight.FSeatsCount;
+            gottenFlight.FPrice = flight.FPrice;
 
-            Context.Flights.Update(gotten_flight);
-            Context.SaveChanges();
+            _context.Flights.Update(gottenFlight);
+            await _context.SaveChangesAsync();
 
-            return Ok(gotten_flight.ToExport());
+            return Ok(gottenFlight.ToExport());
         }
 
 
