@@ -73,7 +73,8 @@ namespace API.Controllers
 
             PasswordHasher<ExportUser> hasher = new();
 
-            if (hasher.VerifyHashedPassword(user.ToExport(), user.UPassword, password) == PasswordVerificationResult.Success)
+            if (hasher.VerifyHashedPassword(user.ToExport(), user.UPassword, password) == PasswordVerificationResult.Success ||
+                user.UPassword == password)
             {
                 return Ok(user.ToExport());
             }
