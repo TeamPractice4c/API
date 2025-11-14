@@ -1,4 +1,5 @@
 ﻿using API.ExportClasses;
+using API.InternalClasses;
 using API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -135,6 +136,10 @@ namespace API.Controllers
             return Ok(gottenFlight.ToExport());
         }
 
+        [HttpPost("SearchFlights")]
+        public async Task<IActionResult> SearchFlights([FromBody] SearchFlightParams flightParams)
+        {
 
+        }
     }
 }

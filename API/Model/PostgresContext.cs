@@ -77,11 +77,11 @@ public partial class PostgresContext(DbContextOptions<PostgresContext> options) 
             entity.Property(e => e.FAirline).HasColumnName("f_airline");
             entity.Property(e => e.FArrivalAirport).HasColumnName("f_arrival_airport");
             entity.Property(e => e.FArrivalTime)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasColumnName("f_arrival_time");
             entity.Property(e => e.FDepartureAirport).HasColumnName("f_departure_airport");
             entity.Property(e => e.FDepartureTime)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasColumnName("f_departure_time");
             entity.Property(e => e.FSeatsCount).HasColumnName("f_seats_count");
             entity.Property(e => e.FPrice).HasColumnName("f_price");

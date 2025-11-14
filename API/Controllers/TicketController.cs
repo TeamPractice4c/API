@@ -60,6 +60,13 @@ namespace API.Controllers
                 return BadRequest("Указанный пользователь не найден");
             }
 
+            List<Ticket> allTicketsOnFlight = await _context.Tickets.Where(x => x.TFlight == flight.FId).ToListAsync();
+
+            if (allTicketsOnFlight.Count + 1 >= flight.FSeatsCount)
+            {
+                return BadRequest("Свободных мест нет");
+            }
+
             int id = await _context.Tickets.AnyAsync() ? await _context.Tickets.MaxAsync(x => x.TId) + 1 : 1;
 
             Ticket newTicket = new()
