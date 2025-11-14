@@ -137,9 +137,20 @@ namespace API.Controllers
         }
 
         [HttpPost("SearchFlights")]
-        public async Task<IActionResult> SearchFlights([FromBody] SearchFlightParams flightParams)
+        public async Task<IActionResult> SearchFlights([FromBody] SearchFlightParams parameters)
         {
+            List<Flight>? gottenFlights = await SearchFlight.FindFLightsAsync(_context, parameters.CountryFrom, parameters.CountryTo, parameters.StartDate, parameters.EndDate);
 
+            if (gottenFlights is null || gottenFlights.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ExportFlight> response = [];
+
+            gottenFlights.ForEach(flight => response.Add(flight.ToExport()));
+
+            return Ok(response);
         }
     }
 }
