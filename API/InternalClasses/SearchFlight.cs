@@ -5,7 +5,7 @@ namespace API.InternalClasses
 {
     internal static class SearchFlight
     {
-        public static async Task<List<Flight>?> FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end)
+        public static async Task<List<Flight>?> FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end, int max = -1, string? airline = null)
         {
             Airport? airportFrom = await context.Airports.FirstOrDefaultAsync(x => x.ApCity.ToLower() == from.ToLower());
 
@@ -21,34 +21,31 @@ namespace API.InternalClasses
                 return null;
             }
 
-            List<Flight> airlines = await context.Flights
+            List<Flight> flights = await context.Flights
                 .Where(x => x.FDepartureAirport == airportFrom.ApId)
                 .Where(x => x.FArrivalAirport == airportTo.ApId)
-                .Where(x => new DateOnly(x.FDepartureTime.Year, x.FDepartureTime.Month, x.FDepartureTime.Day) == start)
-                .Where(x => new DateOnly(x.FArrivalTime.Year, x.FArrivalTime.Month, x.FArrivalTime.Day) == end)
+                .Where(x => new DateOnly(x.FDepartureTime.Year, x.FDepartureTime.Month, x.FDepartureTime.Day) >= start)
+                .Where(x => new DateOnly(x.FArrivalTime.Year, x.FArrivalTime.Month, x.FArrivalTime.Day) <= end)
                 .ToListAsync();
 
-            return airlines;
-        }
-
-        public static async Task FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end, int max = -1)
-        {
-            if (max == -1)
+            if (max != -1)
             {
-                await FindFLightsAsync(context, from, to, start, end);
+                flights = [.. flights.Where(x => x.FPrice <= max)];
             }
 
-
-        }
-
-        public static async Task FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end, string? airline = null)
-        {
-            if (airline is null)
+            if (airline is not null)
             {
-                await FindFLightsAsync(context, from, to, start, end);
+                Airline gottenAirline = await context.Airlines.FirstAsync(x => x.AlName == airline);
+
+                if (gottenAirline is null)
+                {
+                    return null;
+                }
+
+                flights = [.. flights.Where(x => x.FAirline <= gottenAirline.AlId)];
             }
 
-
+            return flights;
         }
     }
 }

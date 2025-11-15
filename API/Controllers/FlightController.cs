@@ -139,11 +139,16 @@ namespace API.Controllers
         [HttpPost("SearchFlights")]
         public async Task<IActionResult> SearchFlights([FromBody] SearchFlightParams parameters)
         {
-            List<Flight>? gottenFlights = await SearchFlight.FindFLightsAsync(_context, parameters.CountryFrom, parameters.CountryTo, parameters.StartDate, parameters.EndDate);
+            List<Flight>? gottenFlights = await SearchFlight.FindFLightsAsync(_context, parameters.CityFrom, parameters.CityTo, parameters.StartDate, parameters.EndDate);
 
-            if (gottenFlights is null || gottenFlights.Count == 0)
+            if (gottenFlights is null)
             {
-                return NotFound();
+                return BadRequest("ERROR");
+            }
+
+            if (gottenFlights.Count == 0)
+            {
+                return NotFound("Рейсы не найдены");
             }
 
             List<ExportFlight> response = [];
