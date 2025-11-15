@@ -30,6 +30,24 @@ namespace API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetUserTickets/{id}")]
+        public async Task<IActionResult> GetUserTickets(int id)
+        {
+            List<Ticket> userTickets = await _context.Tickets
+                .Where(x => x.TUser == id).ToListAsync();
+
+            if (userTickets is null || userTickets.Count == 0)
+            {
+                return NotFound("Билеты не найденв");
+            }
+
+            List<ExportTicket> response = [];
+
+            userTickets.ForEach(x => response.Add(x.ToExport()));
+
+            return Ok(response);
+        }
+
         [HttpGet("GetTicket/{id}")]
         public async Task<IActionResult> GetTicket(int id)
         {
