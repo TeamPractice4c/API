@@ -28,6 +28,22 @@ namespace API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetCurrentFlights")]
+        public async Task<IActionResult> GetCurrentFlights()
+        {
+            List<Flight> flights = await _context.Flights.Where(x => x.FDepartureTime >= DateTime.Now.ToUniversalTime()).ToListAsync() ?? [];
+
+            if (flights is null || flights.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<ExportFlight> response = [];
+
+            flights.ForEach(flight => response.Add(flight.ToExport()));
+            return Ok(response);
+        }
+
         [HttpGet("GetFlight/{id}")]
         public async Task<IActionResult> GetFlight(int id)
         {
