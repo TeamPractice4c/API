@@ -71,7 +71,9 @@ namespace API.Controllers
                 return BadRequest("Указанный рейс не найден");
             }
 
-            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UId == x.GetUserId(ticket.TUser));
+            List<User> users = await _context.Users.ToListAsync();
+            
+            User? user = users.FirstOrDefault(x => x.UId == x.GetUserId(ticket.TUser));
 
             if (user is null)
             {
