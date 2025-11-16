@@ -64,14 +64,14 @@ namespace API.Controllers
         [HttpPost("AddTicket")]
         public async Task<IActionResult> AddTicket([FromBody] ExportTicket ticket)
         {
-            Flight? flight = await _context.Flights.FirstOrDefaultAsync(x => x.FId == ticket.TFlight);
+            Flight? flight = await _context.Flights.AsNoTracking().FirstOrDefaultAsync(x => x.FId == ticket.TFlight);
 
             if (flight is null)
             {
                 return BadRequest("Указанный рейс не найден");
             }
 
-            List<User> users = await _context.Users.ToListAsync();
+            List<User> users = await _context.Users.AsNoTracking().ToListAsync();
             
             User? user = users.FirstOrDefault(x => x.UId == x.GetUserId(ticket.TUser));
 
@@ -80,14 +80,14 @@ namespace API.Controllers
                 return BadRequest("Указанный пользователь не найден");
             }
 
-            List<Ticket> allTicketsOnFlight = await _context.Tickets.Where(x => x.TFlight == flight.FId).ToListAsync();
+            List<Ticket> allTicketsOnFlight = await _context.Tickets.AsNoTracking().Where(x => x.TFlight == flight.FId).ToListAsync();
 
             if (allTicketsOnFlight.Count + 1 >= flight.FSeatsCount)
             {
                 return BadRequest("Свободных мест нет");
             }
 
-            int id = await _context.Tickets.AnyAsync() ? await _context.Tickets.MaxAsync(x => x.TId) + 1 : 1;
+            int id = await _context.Tickets.AsNoTracking().AnyAsync() ? await _context.Tickets.AsNoTracking().MaxAsync(x => x.TId) + 1 : 1;
 
             Ticket newTicket = new()
             {
@@ -104,7 +104,7 @@ namespace API.Controllers
 
             await _context.SaveChangesAsync();
 
-            await SendEmail.SendTicketAsync(_context, id);
+           // await SendEmail.SendTicketAsync(_context, id);
 
             return Ok(newTicket.ToExport());
         }
