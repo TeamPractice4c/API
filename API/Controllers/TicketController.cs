@@ -38,7 +38,7 @@ namespace API.Controllers
 
             if (userTickets is null || userTickets.Count == 0)
             {
-                return NotFound("Билеты не найденв");
+                return NotFound("Билеты не найдены");
             }
 
             List<ExportTicket> response = [];

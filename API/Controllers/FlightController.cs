@@ -32,10 +32,11 @@ namespace API.Controllers
         public async Task<IActionResult> GetCurrentFlights()
         {
             List<Ticket> tickets = await _context.Tickets.AsNoTracking().ToListAsync() ?? [];
-            List<Flight> flights = await _context.Flights.AsNoTracking()
-                .Where(x => x.FDepartureTime >= DateTime.Now.ToUniversalTime())
-                .Where(x => x.FSeatsCount > tickets.Where(t => t.TFlight == x.FId).ToList().Count)
-                .ToListAsync() ?? [];
+            List<Flight> flights = await _context.Flights.AsNoTracking().ToListAsync();
+            flights = flights
+                .Where(x => x.FDepartureTime >= DateTime.Now.ToUniversalTime()).AsEnumerable()
+                .Where(x => x.FSeatsCount > tickets.AsEnumerable().Where(t => t.TFlight == x.FId).ToList().Count)
+                .ToList() ?? [];
 
             if (flights is null || flights.Count == 0)
             {

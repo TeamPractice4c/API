@@ -10,6 +10,8 @@
 
         public DateOnly EndDate { get; set; }
 
+        public int MinCost { get; set; } = -1;
+
         public int MaxCost { get; set; } = -1;
 
         public string? Airline { get; set; }

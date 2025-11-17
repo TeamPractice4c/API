@@ -5,7 +5,7 @@ namespace API.InternalClasses
 {
     internal static class SearchFlight
     {
-        public static async Task<List<Flight>?> FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end, int max = -1, string? airline = null)
+        public static async Task<List<Flight>?> FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end, int min = -1, int max = -1, string? airline = null)
         {
             Airport? airportFrom = await context.Airports.FirstOrDefaultAsync(x => x.ApCity.ToLower() == from.ToLower());
 
@@ -27,6 +27,11 @@ namespace API.InternalClasses
                 .Where(x => new DateOnly(x.FDepartureTime.Year, x.FDepartureTime.Month, x.FDepartureTime.Day) >= start)
                 .Where(x => new DateOnly(x.FArrivalTime.Year, x.FArrivalTime.Month, x.FArrivalTime.Day) <= end)
                 .ToListAsync();
+
+            if (min != -1)
+            {
+                flights = [.. flights.Where(x => x.FPrice >= min)];
+            }
 
             if (max != -1)
             {
