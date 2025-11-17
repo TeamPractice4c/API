@@ -14,7 +14,7 @@ namespace API.Controllers
         [HttpGet("GetAirports")]
         public async Task<IActionResult> GetAirports()
         {
-            List<Airport> airports = await _context.Airports.ToListAsync();
+            List<Airport> airports = await _context.Airports.AsNoTracking().ToListAsync();
 
             if (airports is null || airports.Count == 0)
             {
@@ -31,7 +31,7 @@ namespace API.Controllers
         [HttpGet("GetAirport/{id}")]
         public async Task<IActionResult> GetAiport(int id)
         {
-            Airport? airport = await _context.Airports.FirstOrDefaultAsync(x => x.ApId == id);
+            Airport? airport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApId == id);
 
             if (airport is null)
             {
@@ -44,7 +44,7 @@ namespace API.Controllers
         [HttpPost("AddAirport")]
         public async Task<IActionResult> AddAirport([FromBody] ExportAirport airport)
         {
-            Airport? gottenAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == airport.ApName &&
+            Airport? gottenAirport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApName == airport.ApName &&
             x.ApCountry == airport.ApCountry && x.ApCity == airport.ApCity && x.ApStreet == airport.ApStreet &&
             x.ApBuilding == airport.ApBuilding);
 
@@ -53,7 +53,7 @@ namespace API.Controllers
                 return BadRequest("Аэропорт с такими параметрами уже существует");
             }
 
-            int id = await _context.Airports.AnyAsync() ? await _context.Airports.MaxAsync(x => x.ApId) + 1 : 1;
+            int id = await _context.Airports.AsNoTracking().AnyAsync() ? await _context.Airports.AsNoTracking().MaxAsync(x => x.ApId) + 1 : 1;
 
             Airport newAirport = new()
             {
@@ -75,7 +75,7 @@ namespace API.Controllers
         [HttpPost("EditAirport")]
         public async Task<IActionResult> EditAirport([FromBody] ExportAirport airport)
         {
-            Airport? gottenAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApId == airport.ApId);
+            Airport? gottenAirport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApId == airport.ApId);
 
             if (gottenAirport is null)
             {
@@ -98,7 +98,7 @@ namespace API.Controllers
         [HttpDelete("DeleteAirport/{id}")]
         public async Task<IActionResult> DeleteAirport(int id)
         {
-            Airport? airport = await _context.Airports.FirstOrDefaultAsync(x => x.ApId == id);
+            Airport? airport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApId == id);
 
             if (airport is null)
             {

@@ -15,7 +15,7 @@ namespace API.Controllers
         [HttpGet("GetFlights")]
         public async Task<IActionResult> GetFlights()
         {
-            List<Flight> flights = await _context.Flights.ToListAsync();
+            List<Flight> flights = await _context.Flights.AsNoTracking().ToListAsync();
 
             if (flights is null || flights.Count == 0)
             {
@@ -31,7 +31,11 @@ namespace API.Controllers
         [HttpGet("GetCurrentFlights")]
         public async Task<IActionResult> GetCurrentFlights()
         {
-            List<Flight> flights = await _context.Flights.Where(x => x.FDepartureTime >= DateTime.Now.ToUniversalTime()).ToListAsync() ?? [];
+            List<Ticket> tickets = await _context.Tickets.AsNoTracking().ToListAsync() ?? [];
+            List<Flight> flights = await _context.Flights.AsNoTracking()
+                .Where(x => x.FDepartureTime >= DateTime.Now.ToUniversalTime())
+                .Where(x => x.FSeatsCount > tickets.Where(t => t.TFlight == x.FId).ToList().Count)
+                .ToListAsync() ?? [];
 
             if (flights is null || flights.Count == 0)
             {
@@ -47,7 +51,7 @@ namespace API.Controllers
         [HttpGet("GetFlight/{id}")]
         public async Task<IActionResult> GetFlight(int id)
         {
-            Flight? flight = await _context.Flights.FirstOrDefaultAsync(x => x.FId == id);
+            Flight? flight = await _context.Flights.AsNoTracking().FirstOrDefaultAsync(x => x.FId == id);
 
             if (flight is null)
             {
@@ -60,9 +64,9 @@ namespace API.Controllers
         [HttpPost("AddFlight")]
         public async Task<IActionResult> AddFlight([FromBody] ExportFlight flight)
         {
-            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlName == flight.FAirline);
-            Airport? departureAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FDepartureAirport);
-            Airport? arrivalAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FArrivalAirport);
+            Airline? airline = await _context.Airlines.AsNoTracking().FirstOrDefaultAsync(x => x.AlName == flight.FAirline);
+            Airport? departureAirport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApName == flight.FDepartureAirport);
+            Airport? arrivalAirport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApName == flight.FArrivalAirport);
 
             if (airline is null)
             {
@@ -79,7 +83,7 @@ namespace API.Controllers
                 return BadRequest("Указанный аэропорт страны назначения не найден");
             }
 
-            Flight? gottenFlight = await _context.Flights.FirstOrDefaultAsync(x => x.FAirline == airline.AlId &&
+            Flight? gottenFlight = await _context.Flights.AsNoTracking().FirstOrDefaultAsync(x => x.FAirline == airline.AlId &&
             x.FArrivalAirport == arrivalAirport.ApId && x.FDepartureAirport == departureAirport.ApId &&
             x.FDepartureTime == flight.FDepartureTime && x.FArrivalTime == flight.FArrivalTime);
 
@@ -88,7 +92,7 @@ namespace API.Controllers
                 return BadRequest("Рейс с такими параметрами уже существует");
             }
 
-            int id = await _context.Flights.AnyAsync() ? await _context.Flights.MaxAsync(x => x.FId) + 1 : 1;
+            int id = await _context.Flights.AsNoTracking().AnyAsync() ? await _context.Flights.AsNoTracking().MaxAsync(x => x.FId) + 1 : 1;
 
             Flight newFlight = new()
             {
@@ -112,16 +116,16 @@ namespace API.Controllers
         [HttpPost("EditFlight")]
         public async Task<IActionResult> EditFlight([FromBody] ExportFlight flight)
         {
-            Flight? gottenFlight = await _context.Flights.FirstOrDefaultAsync(x => x.FId == flight.FId);
+            Flight? gottenFlight = await _context.Flights.AsNoTracking().FirstOrDefaultAsync(x => x.FId == flight.FId);
 
             if (gottenFlight is null)
             {
                 return NotFound("Указанный рейс не найден");
             }
 
-            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlName == flight.FAirline);
-            Airport? departutrAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FDepartureAirport);
-            Airport? arrivalAirport = await _context.Airports.FirstOrDefaultAsync(x => x.ApName == flight.FArrivalAirport);
+            Airline? airline = await _context.Airlines.AsNoTracking().FirstOrDefaultAsync(x => x.AlName == flight.FAirline);
+            Airport? departutrAirport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApName == flight.FDepartureAirport);
+            Airport? arrivalAirport = await _context.Airports.AsNoTracking().FirstOrDefaultAsync(x => x.ApName == flight.FArrivalAirport);
 
             if (airline is null)
             {

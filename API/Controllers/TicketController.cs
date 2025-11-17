@@ -16,7 +16,7 @@ namespace API.Controllers
         [HttpGet("GetTickets")]
         public async Task<IActionResult> GetTickets()
         {
-            List<Ticket> tickets = await _context.Tickets.ToListAsync();
+            List<Ticket> tickets = await _context.Tickets.AsNoTracking().ToListAsync();
 
             if (tickets is null || tickets.Count == 0)
             {
@@ -33,7 +33,7 @@ namespace API.Controllers
         [HttpGet("GetUserTickets/{id}")]
         public async Task<IActionResult> GetUserTickets(int id)
         {
-            List<Ticket> userTickets = await _context.Tickets
+            List<Ticket> userTickets = await _context.Tickets.AsNoTracking()
                 .Where(x => x.TUser == id).ToListAsync();
 
             if (userTickets is null || userTickets.Count == 0)
@@ -51,7 +51,7 @@ namespace API.Controllers
         [HttpGet("GetTicket/{id}")]
         public async Task<IActionResult> GetTicket(int id)
         {
-            Ticket? ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.TId == id);
+            Ticket? ticket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(x => x.TId == id);
 
             if (ticket is null)
             {
@@ -104,7 +104,7 @@ namespace API.Controllers
 
             await _context.SaveChangesAsync();
 
-           // await SendEmail.SendTicketAsync(_context, id);
+            await SendEmail.SendTicketAsync(_context, id);
 
             return Ok(newTicket.ToExport());
         }
@@ -112,7 +112,7 @@ namespace API.Controllers
         [HttpPost("ChangeTicketStatus")]
         public async Task<IActionResult> ChangeTicketStatus([FromBody] ExportTicket ticket)
         {
-            Ticket? gottenTicket = await _context.Tickets.FirstOrDefaultAsync(x => x.TId == ticket.TId);
+            Ticket? gottenTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(x => x.TId == ticket.TId);
 
             if (gottenTicket is null)
             {

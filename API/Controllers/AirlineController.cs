@@ -15,7 +15,7 @@ namespace API.Controllers
         [HttpGet("GetAirlines")]
         public async Task<IActionResult> GetAirlines()
         {
-            List<Airline> airlines = await _context.Airlines.ToListAsync();
+            List<Airline> airlines = await _context.Airlines.AsNoTracking().ToListAsync();
 
             if (airlines is null || airlines.Count == 0)
             {
@@ -32,7 +32,7 @@ namespace API.Controllers
         [HttpGet("GetAirline/{id}")]
         public async Task<IActionResult> GetAirline(int id)
         {
-            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlId == id);
+            Airline? airline = await _context.Airlines.AsNoTracking().FirstOrDefaultAsync(x => x.AlId == id);
 
             if (airline is null)
             {
@@ -45,14 +45,14 @@ namespace API.Controllers
         [HttpPost("AddAirline")]
         public async Task<IActionResult> AddAirline([FromBody] ExportAirline airline)
         {
-            Airline? gottenAirline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlName == airline.AlName);
+            Airline? gottenAirline = await _context.Airlines.AsNoTracking().FirstOrDefaultAsync(x => x.AlName == airline.AlName);
 
             if (gottenAirline is not null)
             {
                 return BadRequest("Авиакомпания с такими параметрами уже существует");
             }
 
-            int id = await _context.Airlines.AnyAsync() ? await _context.Airlines.MaxAsync(x => x.AlId) + 1 : 1;
+            int id = await _context.Airlines.AsNoTracking().AnyAsync() ? await _context.Airlines.AsNoTracking().MaxAsync(x => x.AlId) + 1 : 1;
 
             Airline newAirline = new()
             {
@@ -71,7 +71,7 @@ namespace API.Controllers
         [HttpPost("EditAirline")]
         public async Task<IActionResult> EditAirline([FromBody] ExportAirline airline)
         {
-            Airline? gottenAirline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlId == airline.AlId);
+            Airline? gottenAirline = await _context.Airlines.AsNoTracking().FirstOrDefaultAsync(x => x.AlId == airline.AlId);
 
             if (gottenAirline is null)
             {
@@ -91,7 +91,7 @@ namespace API.Controllers
         [HttpDelete("DeleteAirline/{id}")]
         public async Task<IActionResult> DeleteAirline(int id)
         {
-            Airline? airline = await _context.Airlines.FirstOrDefaultAsync(x => x.AlId == id);
+            Airline? airline = await _context.Airlines.AsNoTracking().FirstOrDefaultAsync(x => x.AlId == id);
 
             if (airline is null)
             {
@@ -114,7 +114,7 @@ namespace API.Controllers
                 return BadRequest("Файл изображения не передан или пустой.");
             }
 
-            if (!await _context.Airlines.AnyAsync(x => x.AlId == airlineId))
+            if (!await _context.Airlines.AsNoTracking().AnyAsync(x => x.AlId == airlineId))
             {
                 return NotFound("Указанная авиакомпания не найдена");
             }

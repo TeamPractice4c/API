@@ -17,7 +17,7 @@ namespace API.Controllers
         [HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers()
         {
-            List<User> users = await _context.Users.ToListAsync();
+            List<User> users = await _context.Users.AsNoTracking().ToListAsync();
 
             if (users is null || users.Count == 0)
             {
@@ -33,7 +33,7 @@ namespace API.Controllers
         [HttpGet("GetUser/{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
-            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UId == id);
+            User? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UId == id);
 
             if (user is null)
             {
@@ -46,7 +46,7 @@ namespace API.Controllers
         [HttpDelete("DeleteUser/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UId == id);
+            User? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UId == id);
 
             if (user is null)
             {
@@ -64,7 +64,7 @@ namespace API.Controllers
         [HttpPost("Auth")]
         public async Task<IActionResult> Authorization([FromForm] string login, [FromForm] string password)
         {
-            User? user = await _context.Users.FirstOrDefaultAsync(x => x.UEmail == login);
+            User? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UEmail == login);
 
             if (user is null)
             {
@@ -85,24 +85,24 @@ namespace API.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] ExportUser user)
         {
-            if (await _context.Users.AnyAsync(x => x.UEmail == user.UEmail))
+            if (await _context.Users.AsNoTracking().AnyAsync(x => x.UEmail == user.UEmail))
             {
                 return BadRequest("Указанный логин занят");
             }
 
-            if (await _context.Users.AnyAsync(x => x.UPhone == user.UPhone))
+            if (await _context.Users.AsNoTracking().AnyAsync(x => x.UPhone == user.UPhone))
             {
                 return BadRequest("Указаный номер телефона занят");
             }
 
-            if (await _context.Users.AnyAsync(x => x.UPassportNumber == user.UPassportNumber))
+            if (await _context.Users.AsNoTracking().AnyAsync(x => x.UPassportNumber == user.UPassportNumber))
             {
                 return BadRequest("Указаный номер пасспорта уже используется");
             }
 
-            int id = await _context.Users.AnyAsync() ? await _context.Users.MaxAsync(x => x.UId) + 1 : 1;
+            int id = await _context.Users.AsNoTracking().AnyAsync() ? await _context.Users.AsNoTracking().MaxAsync(x => x.UId) + 1 : 1;
 
-            if (await _context.Users.FirstOrDefaultAsync(x => x.UId == id) != null)
+            if (await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UId == id) != null)
             {
                 return BadRequest();
             }
@@ -137,7 +137,7 @@ namespace API.Controllers
         [HttpPost("ChangePassword")]
         public async Task<IActionResult> ChangeUserPassword([FromBody] ExportUser user)
         {
-            User? gottenUser = await _context.Users.FirstOrDefaultAsync(x => x.UId == user.UId);
+            User? gottenUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UId == user.UId);
 
             if (gottenUser is null)
             {
@@ -158,7 +158,7 @@ namespace API.Controllers
         [HttpPost("EditUser")]
         public async Task<IActionResult> EditUserInfo([FromBody] ExportUser user)
         {
-            User? gottenUser = await _context.Users.FirstOrDefaultAsync(x => x.UId == user.UId);
+            User? gottenUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UId == user.UId);
 
             if (gottenUser is null)
             {
@@ -195,7 +195,7 @@ namespace API.Controllers
                 return BadRequest("Файл изображения не передан или пустой.");
             }
 
-            if (!await _context.Users.AnyAsync(x => x.UId == userId))
+            if (!await _context.Users.AsNoTracking().AnyAsync(x => x.UId == userId))
             {
                 return BadRequest("Пользователь не найден");
             }
