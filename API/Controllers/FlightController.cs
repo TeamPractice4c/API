@@ -160,12 +160,8 @@ namespace API.Controllers
         [HttpPost("SearchFlights")]
         public async Task<IActionResult> SearchFlights([FromBody] SearchFlightParams parameters)
         {
-            List<Flight>? gottenFlights = await SearchFlight.FindFLightsAsync(_context, parameters.CityFrom, parameters.CityTo, parameters.StartDate, parameters.EndDate);
-
-            if (gottenFlights is null)
-            {
-                return BadRequest("ERROR");
-            }
+            List<Flight> gottenFlights = await SearchFlight.FindFLightsAsync(_context,
+                parameters.CityFrom, parameters.CityTo, parameters.StartDate, parameters.EndDate, parameters.MinCost, parameters.MaxCost, parameters.Airline);
 
             if (gottenFlights.Count == 0)
             {

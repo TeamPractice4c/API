@@ -17,14 +17,14 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<PostgresContext>((options) =>
+builder.Services.AddDbContextFactory<PostgresContext>((options) =>
 {
     options.UseLazyLoadingProxies().UseNpgsql(conString, o =>
          o.MapEnum<Role>("role", "skywhysales", new NpgsqlNullNameTranslator())
         .MapEnum<TicketStatus>("ticket_status", "skywhysales", new NpgsqlNullNameTranslator())
         .MapEnum<ClassOfService>("class_of_service", "skywhysales", new NpgsqlNullNameTranslator())
        );
-}, ServiceLifetime.Singleton);
+});
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 

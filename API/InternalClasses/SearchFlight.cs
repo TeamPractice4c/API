@@ -5,20 +5,20 @@ namespace API.InternalClasses
 {
     internal static class SearchFlight
     {
-        public static async Task<List<Flight>?> FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end, int min = -1, int max = -1, string? airline = null)
+        public static async Task<List<Flight>> FindFLightsAsync(PostgresContext context, string from, string to, DateOnly start, DateOnly end, int min = -1, int max = -1, string? airline = null)
         {
             Airport? airportFrom = await context.Airports.FirstOrDefaultAsync(x => x.ApCity.ToLower() == from.ToLower());
 
             if (airportFrom is null)
             {
-                return null;
+                return [];
             }
 
             Airport? airportTo = await context.Airports.FirstOrDefaultAsync(x => x.ApCity.ToLower() == to.ToLower());
             
             if (airportTo is null)
             {
-                return null;
+                return [];
             }
 
             List<Flight> flights = await context.Flights
@@ -38,13 +38,13 @@ namespace API.InternalClasses
                 flights = [.. flights.Where(x => x.FPrice <= max)];
             }
 
-            if (airline is not null)
+            if (airline is not null && airline != string.Empty)
             {
-                Airline gottenAirline = await context.Airlines.FirstAsync(x => x.AlName == airline);
+                Airline? gottenAirline = await context.Airlines.FirstOrDefaultAsync(x => x.AlName.ToLower() == airline.ToLower());
 
                 if (gottenAirline is null)
                 {
-                    return null;
+                    return [];
                 }
 
                 flights = [.. flights.Where(x => x.FAirline <= gottenAirline.AlId)];
