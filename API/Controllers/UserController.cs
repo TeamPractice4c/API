@@ -165,7 +165,11 @@ namespace API.Controllers
                 return BadRequest("Пользователь не найден");
             }
 
-            if (gottenUser.UPhone == user.UPhone)
+            List<string> phones = await _context.Users.Select(x => x.UPhone).ToListAsync();
+
+            phones.Remove(gottenUser.UPhone);
+
+            if (phones.Contains(user.UPhone))
             {
                 return BadRequest("Указанный номер телеофна занят");
             }
