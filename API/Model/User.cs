@@ -57,15 +57,8 @@ public partial class User
         };
     }
 
-    public int GetUserId(string snp)
+    public int GetUserId(string email)
     {
-        string user_snp = $"{USurname} {UName} {UPatronymic}";
-
-        if (user_snp == snp)
-        {
-            return UId;
-        }
-
-        return -1;
+        return email == UEmail ? UId : -1;
     }
 }
